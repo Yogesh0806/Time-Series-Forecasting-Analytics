@@ -146,28 +146,39 @@ monthly = train.resample('M').mean()
 # monthly.Count.plot(figsize=(10,4), title='monthly', fontsize=14, ax=axs[3])
 # plt.show()
 
-fig, axs = plt.subplots(4, 1, figsize=(7, 9))
-hourly.Count.plot(title='Hourly',fontsize=12,linewidth=2,color='royalblue',ax=axs[0])
-axs[0].set_ylabel("Count", fontsize=11)
-axs[0].grid(alpha=0.3)
-axs[0].legend(['Hourly'], fontsize=10)
+# fig, axs = plt.subplots(4, 1, figsize=(7, 9))
+# hourly.Count.plot(title='Hourly',fontsize=12,linewidth=2,color='royalblue',ax=axs[0])
+# axs[0].set_ylabel("Count", fontsize=11)
+# axs[0].grid(alpha=0.3)
+# axs[0].legend(['Hourly'], fontsize=10)
 
-daily.Count.plot(title='Daily',fontsize=12,linewidth=2,color='darkorange',ax=axs[1])
-axs[1].set_ylabel("Count", fontsize=11)
-axs[1].grid(alpha=0.3)
-axs[1].legend(['Daily'], fontsize=10)
+# daily.Count.plot(title='Daily',fontsize=12,linewidth=2,color='darkorange',ax=axs[1])
+# axs[1].set_ylabel("Count", fontsize=11)
+# axs[1].grid(alpha=0.3)
+# axs[1].legend(['Daily'], fontsize=10)
 
-weekly.Count.plot(title='Weekly',fontsize=12,linewidth=2,color='green',ax=axs[2])
-axs[2].set_ylabel("Count", fontsize=11)
-axs[2].grid(alpha=0.3)
-axs[2].legend(['Weekly'], fontsize=10)
+# weekly.Count.plot(title='Weekly',fontsize=12,linewidth=2,color='green',ax=axs[2])
+# axs[2].set_ylabel("Count", fontsize=11)
+# axs[2].grid(alpha=0.3)
+# axs[2].legend(['Weekly'], fontsize=10)
 
-monthly.Count.plot(title='Monthly',fontsize=12,linewidth=2,color='crimson',ax=axs[3])
-axs[3].set_ylabel("Count", fontsize=11)
-axs[3].set_xlabel("Date", fontsize=12)
-axs[3].grid(alpha=0.3)
-axs[3].legend(['Monthly'], fontsize=10)
+# monthly.Count.plot(title='Monthly',fontsize=12,linewidth=2,color='crimson',ax=axs[3])
+# axs[3].set_ylabel("Count", fontsize=11)
+# axs[3].set_xlabel("Date", fontsize=12)
+# axs[3].grid(alpha=0.3)
+# axs[3].legend(['Monthly'], fontsize=10)
 
-plt.tight_layout()
-plt.show()
+# plt.tight_layout()
+# plt.show()
 
+test.timestamp = pd.to_datetime(test.Datetime, format= '%d-&m-%Y %H:%M')
+test.index = test.timestamp
+
+#Converting to daily mean
+test = test.resample('D').mean()
+
+train.timestamp = pd.to_datetime(train.Datetime, format='%d-%m-%Y %H-%M')
+train.index = train.timestamp
+
+#Converting to daily mean
+train = train.resample('D').mean()
