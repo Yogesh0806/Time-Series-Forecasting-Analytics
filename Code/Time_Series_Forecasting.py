@@ -8,6 +8,21 @@ train = pd.read_csv(r"C:\Users\HP\OneDrive\Documents\Desktop\Time Series Analysi
 test = pd.read_csv(r"C:\Users\HP\OneDrive\Documents\Desktop\Time Series Analysis- ALV\Data\Test_0qrQsBZ.csv")
 
 
+
+train_original = train.copy()
+test_original = test.copy()
+train['Datetime'] = pd.to_datetime(train['Datetime'], format='%d-%m-%Y %H:%M')
+test['Datetime'] = pd.to_datetime(test['Datetime'], format='%d-%m-%Y %H:%M')
+
+train_original['Datetime'] = pd.to_datetime(train_original['Datetime'], format='%d-%m-%Y %H:%M')
+test_original['Datetime'] = pd.to_datetime(test_original['Datetime'], format='%d-%m-%Y %H:%M')
+
+for df in (train, test, train_original, test_original):
+    df['year'] = df['Datetime'].dt.year
+    df['month'] = df['Datetime'].dt.month
+    df['day'] = df['Datetime'].dt.day
+    df['Hour'] = df['Datetime'].dt.hour
+
 train['Datetime'] = pd.to_datetime(train['Datetime'], format='%d-%m-%Y %H:%M')
 train.set_index('Datetime', inplace=True)
 
@@ -114,16 +129,61 @@ from statsmodels.tsa.api import ExponentialSmoothing, SimpleExpSmoothing,Holt
 # result = sm.tsa.stattools.adfuller(train.Count)
 # plt.show()
 
-y_hat_Avg = valid.copy()
+# y_hat_Avg = valid.copy()
 fit1 = Holt(np.asarray(Train['Count'])).fit(smoothing_level=0.3, smoothing_slope = 0.1)
-y_hat_Avg['Holt_linear'] = fit1.forecast(len(valid))
-plt.figure(figsize=(16,8))
-plt.plot(Train['Count'], label = 'Train')
-plt.plot(valid['Count'], label= 'Valid')
-plt.plot(y_hat_Avg['Holt_linear'], label = 'Holt_linear')
-plt.legend(loc = 'best')
-plt.show()
+# y_hat_Avg['Holt_linear'] = fit1.forecast(len(valid))
+# plt.figure(figsize=(16,8))
+# plt.plot(Train['Count'], label = 'Train')
+# plt.plot(valid['Count'], label= 'Valid')
+# plt.plot(y_hat_Avg['Holt_linear'], label = 'Holt_linear')
+# plt.legend(loc = 'best')
+# plt.show()
 
-rms = sqrt(mean_squared_error(valid.Count, y_hat_Avg.Holt_linear))
-print(rms)
+# rms = sqrt(mean_squared_error(valid.Count, y_hat_Avg.Holt_linear))
+# print(rms)
         # 475.09398202897876
+
+
+'''Holt's Linear Trend model on daily time series'''
+
+submission = pd.read_csv(
+    r'C:\Users\HP\OneDrive\Documents\Desktop\Time Series Analysis- ALV\Data\sample_submission_LSeus50.csv'
+)
+
+# Forecast
+predict = fit1.forecast(len(test))
+test['prediction'] = predict
+
+# Calculate hourly ratio
+train_original['ratio'] = train_original['Count'] / train_original['Count'].sum()
+
+# Group by Hour
+temp = train_original.groupby('Hour', as_index=False)['ratio'].sum()
+
+# No need to write/read a CSV
+temp2 = temp.copy()
+
+# Merge test and test_original
+merge = pd.merge(test,test_original,on=['day', 'month', 'year'],how='left')
+print(merge.columns.tolist())
+# Keep original Hour column
+merge['Hour'] = merge['Hour_y']
+
+# Drop unnecessary columns
+merge.drop(columns=['year', 'month', 'Hour_x', 'Hour_y'],inplace=True)
+
+
+# Merge with hourly ratios
+prediction = pd.merge(merge,temp2,on='Hour',how='left')
+
+# Convert back to hourly counts
+prediction['Count'] = prediction['prediction'] * prediction['ratio'] * 24
+
+# Final ID
+prediction['ID'] = prediction['ID_y']
+
+# Final submission
+submission = prediction.drop(columns=['ID_x', 'day', 'ID_y', 'prediction', 'Hour', 'ratio'])
+
+# Save CSV
+submission[['ID', 'Count']].to_csv('Holt_linear.csv',index=False)

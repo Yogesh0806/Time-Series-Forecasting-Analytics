@@ -171,14 +171,15 @@ monthly = train.resample('M').mean()
 # plt.tight_layout()
 # plt.show()
 
-test.timestamp = pd.to_datetime(test.Datetime, format= '%d-&m-%Y %H:%M')
-test.index = test.timestamp
+# test.timestamp = pd.to_datetime(test.Datetime, format= '%d-&m-%Y %H:%M')
+# test.index = test.timestamp
 
-#Converting to daily mean
-test = test.resample('D').mean()
+# #Converting to daily mean
+# test = test.resample('D').mean()
 
-train.timestamp = pd.to_datetime(train.Datetime, format='%d-%m-%Y %H-%M')
-train.index = train.timestamp
+# train.timestamp = pd.to_datetime(train.Datetime, format='%d-%m-%Y %H-%M')
+# train.index = train.timestamp
 
-#Converting to daily mean
-train = train.resample('D').mean()
+# #Converting to daily mean
+# train = train.resample('D').mean()
+
