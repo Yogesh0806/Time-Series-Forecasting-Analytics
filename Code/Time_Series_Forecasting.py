@@ -89,19 +89,41 @@ from math import sqrt
 
 from statsmodels.tsa.api import ExponentialSmoothing, SimpleExpSmoothing,Holt
 
-y_hat_avg = valid.copy()
-fit2 = SimpleExpSmoothing(np.asarray(Train['Count'])).fit(smoothing_level=0.6,optimized=False) 
-y_hat_avg['SES'] = fit2.forecast(len(valid))
+# y_hat_avg = valid.copy()
+# fit2 = SimpleExpSmoothing(np.asarray(Train['Count'])).fit(smoothing_level=0.6,optimized=False) 
+# y_hat_avg['SES'] = fit2.forecast(len(valid))
 
-plt.figure(figsize=(12,7))
+# plt.figure(figsize=(12,7))
+# plt.plot(Train['Count'], label = 'Train')
+# plt.plot(valid['Count'], label = 'Valid')
+# plt.plot(y_hat_avg['SES'], label = 'SES')
+# plt.legend(loc = 'best')
+# plt.show()
+
+
+# rms = sqrt(mean_squared_error(valid.Count, y_hat_avg.SES))
+# print(rms)
+
+        # 186.40944652452376
+        
+        
+'''Holt's Linear Trend Model'''
+
+# import statsmodels.api as sm
+# sm.tsa.seasonal_decompose(Train.Count).plot()
+# result = sm.tsa.stattools.adfuller(train.Count)
+# plt.show()
+
+y_hat_Avg = valid.copy()
+fit1 = Holt(np.asarray(Train['Count'])).fit(smoothing_level=0.3, smoothing_slope = 0.1)
+y_hat_Avg['Holt_linear'] = fit1.forecast(len(valid))
+plt.figure(figsize=(16,8))
 plt.plot(Train['Count'], label = 'Train')
-plt.plot(valid['Count'], label = 'Valid')
-plt.plot(y_hat_avg['SES'], label = 'SES')
+plt.plot(valid['Count'], label= 'Valid')
+plt.plot(y_hat_Avg['Holt_linear'], label = 'Holt_linear')
 plt.legend(loc = 'best')
 plt.show()
 
-
-rms = sqrt(mean_squared_error(valid.Count, y_hat_avg.SES))
+rms = sqrt(mean_squared_error(valid.Count, y_hat_Avg.Holt_linear))
 print(rms)
-
-        # 186.40944652452376
+        # 475.09398202897876
