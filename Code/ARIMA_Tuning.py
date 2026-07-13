@@ -1,5 +1,6 @@
 '''Parameter tuning for ARIMA model'''
 
+
 '''Dickey-Fuller test'''
 import pandas as pd
 import numpy as np
@@ -60,12 +61,7 @@ def test_stationarity(timeseries):
 
     result = adfuller(timeseries.dropna(), autolag='AIC')
 
-    labels = [
-        'Test Statistic',
-        'p-value',
-        '# Lags Used',
-        'Number of Observations'
-    ]
+    labels = ['Test Statistic','p-value','# Lags Used','Number of Observations']
 
     output = pd.Series(result[0:4], index=labels)
 
@@ -83,14 +79,29 @@ def test_stationarity(timeseries):
 
 test_stationarity(train_original['Count'])
 
-'''     OUTPUT
+#      OUTPUT
 
-Test Statistic               -4.456561
-p-value                       0.000235
-# Lags Used                  45.000000
-Number of Observations    18242.000000
-Critical Value (1%)          -3.430709
-Critical Value (5%)          -2.861698
-Critical Value (10%)         -2.566854
-dtype: float64
-'''
+# Test Statistic               -4.456561
+# p-value                       0.000235
+# # Lags Used                  45.000000
+# Number of Observations    18242.000000
+# Critical Value (1%)          -3.430709
+# Critical Value (5%)          -2.861698
+# Critical Value (10%)         -2.566854
+# dtype: float64
+
+
+
+'''Removing Trend'''
+
+Train = train.loc['2012-08-25':'2014-06-24']
+valid = train.loc['2014-06-25':'2014-09-25']
+
+Train_log = np.log(Train['Count'])
+valid_log = np.log(valid['Count'])
+
+moving_avg = Train_log.rolling(window=24).mean()
+
+# plt.plot(Train_log)
+# plt.plot(moving_avg, color='red')
+# plt.show()
