@@ -204,22 +204,22 @@ y_hat_avg['Holt_Winter'] = fit1.forecast(len(valid))
 # print(rms)
         # 231.06996503599782
     
-predict = fit1.forecast(len(test))
-test['prediction'] = predict
+# predict = fit1.forecast(len(test))
+# test['prediction'] = predict
 
-# Merge Test and test_original on day, month and year
-merge = pd.merge(test, test_original, on =('day', 'month', 'year'), how='left')
-merge['Hour'] = merge['Hour_y']
-merge = merge.drop(['year', 'month', 'Hour_x', 'Hour_y'], axis =1)
+# # Merge Test and test_original on day, month and year
+# merge = pd.merge(test, test_original, on =('day', 'month', 'year'), how='left')
+# merge['Hour'] = merge['Hour_y']
+# merge = merge.drop(['year', 'month', 'Hour_x', 'Hour_y'], axis =1)
 
-#Predicting by merging merge and temp2
-prediction = pd.merge(merge, temp2, on='Hour', how='left')
+# #Predicting by merging merge and temp2
+# prediction = pd.merge(merge, temp2, on='Hour', how='left')
 
-#Converting the ratio to the original scale
-prediction['Count'] = prediction['prediction']*prediction['ratio']*24
+# #Converting the ratio to the original scale
+# prediction['Count'] = prediction['prediction']*prediction['ratio']*24
 
-prediction['ID'] = prediction['ID_y']
-submission = prediction.drop(['day', 'Hour', 'ratio', 'prediction', 'ID_x', 'ID_y'], axis=1)
+# prediction['ID'] = prediction['ID_y']
+# submission = prediction.drop(['day', 'Hour', 'ratio', 'prediction', 'ID_x', 'ID_y'], axis=1)
 
-#Converting the final submision to csv format 
-pd.DataFrame(submission, columns =['ID', 'Count']).to_csv('Holt winters.csv')
+# #Converting the final submision to csv format 
+# pd.DataFrame(submission, columns =['ID', 'Count']).to_csv('Holt winters.csv')

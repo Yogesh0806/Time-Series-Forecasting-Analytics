@@ -1,0 +1,96 @@
+'''Parameter tuning for ARIMA model'''
+
+'''Dickey-Fuller test'''
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from statsmodels.tsa.stattools import adfuller
+from matplotlib.pylab import rcParams
+
+
+rcParams['figure.figsize'] = (20, 8)
+
+train = pd.read_csv(r"C:\Users\HP\OneDrive\Documents\Desktop\Time Series Analysis- ALV\Data\Train_SU63ISt.csv")
+
+test = pd.read_csv(r"C:\Users\HP\OneDrive\Documents\Desktop\Time Series Analysis- ALV\Data\Test_0qrQsBZ.csv")
+
+# Backup Copies
+train_original = train.copy()
+test_original = test.copy()
+
+
+train['Datetime'] = pd.to_datetime(train['Datetime'],format='%d-%m-%Y %H:%M')
+
+test['Datetime'] = pd.to_datetime(test['Datetime'],format='%d-%m-%Y %H:%M')
+
+train_original['Datetime'] = pd.to_datetime(train_original['Datetime'],format='%d-%m-%Y %H:%M')
+
+test_original['Datetime'] = pd.to_datetime(test_original['Datetime'],format='%d-%m-%Y %H:%M')
+
+
+for df in [train, test, train_original, test_original]:
+    df['Year'] = df['Datetime'].dt.year
+    df['Month'] = df['Datetime'].dt.month
+    df['Day'] = df['Datetime'].dt.day
+    df['Hour'] = df['Datetime'].dt.hour
+
+
+train.set_index('Datetime', inplace=True)
+train_original.set_index('Datetime', inplace=True)
+
+
+def test_stationarity(timeseries):
+
+    rolling_mean = timeseries.rolling(window=24).mean()
+    rolling_std = timeseries.rolling(window=24).std()
+
+    plt.figure(figsize=(20,8))
+    plt.plot(timeseries, label='Original', color='blue')
+    plt.plot(rolling_mean, label='Rolling Mean', color='red')
+    plt.plot(rolling_std, label='Rolling Std', color='black')
+
+    plt.title("Rolling Mean & Rolling Standard Deviation")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+    print("=" * 60)
+    print("Augmented Dickey-Fuller Test")
+    print("=" * 60)
+
+    result = adfuller(timeseries.dropna(), autolag='AIC')
+
+    labels = [
+        'Test Statistic',
+        'p-value',
+        '# Lags Used',
+        'Number of Observations'
+    ]
+
+    output = pd.Series(result[0:4], index=labels)
+
+    for key, value in result[4].items():
+        output[f'Critical Value ({key})'] = value
+
+    print(output)
+
+    print("\nConclusion")
+
+    if result[1] <= 0.05:
+        print("Data is Stationary.")
+    else:
+        print("Data is NOT Stationary.")
+
+test_stationarity(train_original['Count'])
+
+'''     OUTPUT
+
+Test Statistic               -4.456561
+p-value                       0.000235
+# Lags Used                  45.000000
+Number of Observations    18242.000000
+Critical Value (1%)          -3.430709
+Critical Value (5%)          -2.861698
+Critical Value (10%)         -2.566854
+dtype: float64
+'''
