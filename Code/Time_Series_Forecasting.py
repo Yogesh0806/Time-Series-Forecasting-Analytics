@@ -146,44 +146,67 @@ fit1 = Holt(np.asarray(Train['Count'])).fit(smoothing_level=0.3, smoothing_slope
 
 '''Holt's Linear Trend model on daily time series'''
 
-submission = pd.read_csv(
-    r'C:\Users\HP\OneDrive\Documents\Desktop\Time Series Analysis- ALV\Data\sample_submission_LSeus50.csv'
-)
+# submission = pd.read_csv(
+#     r'C:\Users\HP\OneDrive\Documents\Desktop\Time Series Analysis- ALV\Data\sample_submission_LSeus50.csv'
+# )
 
-# Forecast
+# # Forecast
+# predict = fit1.forecast(len(test))
+# test['prediction'] = predict
+
+# # Calculate hourly ratio
+# train_original['ratio'] = train_original['Count'] / train_original['Count'].sum()
+
+# # Group by Hour
+# temp = train_original.groupby('Hour', as_index=False)['ratio'].sum()
+
+# # No need to write/read a CSV
+# temp2 = temp.copy()
+
+# # Merge test and test_original
+# merge = pd.merge(test,test_original,on=['day', 'month', 'year'],how='left')
+# print(merge.columns.tolist())
+# # Keep original Hour column
+# merge['Hour'] = merge['Hour_y']
+
+# # Drop unnecessary columns
+# merge.drop(columns=['year', 'month', 'Hour_x', 'Hour_y'],inplace=True)
+
+
+# # Merge with hourly ratios
+# prediction = pd.merge(merge,temp2,on='Hour',how='left')
+
+# # Convert back to hourly counts
+# prediction['Count'] = prediction['prediction'] * prediction['ratio'] * 24
+
+# # Final ID
+# prediction['ID'] = prediction['ID_y']
+
+# # Final submission
+# submission = prediction.drop(columns=['ID_x', 'day', 'ID_y', 'prediction', 'Hour', 'ratio'])
+
+# # Save CSV
+# submission[['ID', 'Count']].to_csv('Holt_linear.csv',index=False)
+
+'''Holt Winter's model on daily time series'''
+
+y_hat_avg= valid.copy()
+fit1 = ExponentialSmoothing(np.asarray(Train['Count']), seasonal_periods=7, trend='add', seasonal='add').fit()
+y_hat_avg['Holt_Winter'] = fit1.forecast(len(valid))
+# plt.figure(figsize=(16,8))
+# plt.plot(Train['Count'], label = 'Train')
+# plt.plot(valid['Count'], label = 'Valid')
+# plt.plot(y_hat_avg['Holt_Winter'], label = 'Holt_Winter')
+# plt.legend(loc = 'best')
+# plt.show()
+
+rms = sqrt(mean_squared_error(valid.Count, y_hat_avg.Holt_Winter))
+print(rms)
+        # 231.06996503599782
+    
 predict = fit1.forecast(len(test))
 test['prediction'] = predict
 
-# Calculate hourly ratio
-train_original['ratio'] = train_original['Count'] / train_original['Count'].sum()
-
-# Group by Hour
-temp = train_original.groupby('Hour', as_index=False)['ratio'].sum()
-
-# No need to write/read a CSV
-temp2 = temp.copy()
-
-# Merge test and test_original
-merge = pd.merge(test,test_original,on=['day', 'month', 'year'],how='left')
-print(merge.columns.tolist())
-# Keep original Hour column
+# Merge Test and test_original on day, month and year
+merge - pd.merge(test, test_original, on =('day', 'month', 'year'), how='left')
 merge['Hour'] = merge['Hour_y']
-
-# Drop unnecessary columns
-merge.drop(columns=['year', 'month', 'Hour_x', 'Hour_y'],inplace=True)
-
-
-# Merge with hourly ratios
-prediction = pd.merge(merge,temp2,on='Hour',how='left')
-
-# Convert back to hourly counts
-prediction['Count'] = prediction['prediction'] * prediction['ratio'] * 24
-
-# Final ID
-prediction['ID'] = prediction['ID_y']
-
-# Final submission
-submission = prediction.drop(columns=['ID_x', 'day', 'ID_y', 'prediction', 'Hour', 'ratio'])
-
-# Save CSV
-submission[['ID', 'Count']].to_csv('Holt_linear.csv',index=False)
