@@ -155,13 +155,13 @@ fit1 = Holt(np.asarray(Train['Count'])).fit(smoothing_level=0.3, smoothing_slope
 # test['prediction'] = predict
 
 # # Calculate hourly ratio
-# train_original['ratio'] = train_original['Count'] / train_original['Count'].sum()
+train_original['ratio'] = train_original['Count'] / train_original['Count'].sum()
 
 # # Group by Hour
-# temp = train_original.groupby('Hour', as_index=False)['ratio'].sum()
+temp = train_original.groupby('Hour', as_index=False)['ratio'].sum()
 
 # # No need to write/read a CSV
-# temp2 = temp.copy()
+temp2 = temp.copy()
 
 # # Merge test and test_original
 # merge = pd.merge(test,test_original,on=['day', 'month', 'year'],how='left')
@@ -200,13 +200,26 @@ y_hat_avg['Holt_Winter'] = fit1.forecast(len(valid))
 # plt.legend(loc = 'best')
 # plt.show()
 
-rms = sqrt(mean_squared_error(valid.Count, y_hat_avg.Holt_Winter))
-print(rms)
+# rms = sqrt(mean_squared_error(valid.Count, y_hat_avg.Holt_Winter))
+# print(rms)
         # 231.06996503599782
     
 predict = fit1.forecast(len(test))
 test['prediction'] = predict
 
 # Merge Test and test_original on day, month and year
-merge - pd.merge(test, test_original, on =('day', 'month', 'year'), how='left')
+merge = pd.merge(test, test_original, on =('day', 'month', 'year'), how='left')
 merge['Hour'] = merge['Hour_y']
+merge = merge.drop(['year', 'month', 'Hour_x', 'Hour_y'], axis =1)
+
+#Predicting by merging merge and temp2
+prediction = pd.merge(merge, temp2, on='Hour', how='left')
+
+#Converting the ratio to the original scale
+prediction['Count'] = prediction['prediction']*prediction['ratio']*24
+
+prediction['ID'] = prediction['ID_y']
+submission = prediction.drop(['day', 'Hour', 'ratio', 'prediction', 'ID_x', 'ID_y'], axis=1)
+
+#Converting the final submision to csv format 
+pd.DataFrame(submission, columns =['ID', 'Count']).to_csv('Holt winters.csv')
