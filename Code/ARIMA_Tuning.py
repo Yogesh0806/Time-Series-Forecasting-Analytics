@@ -45,19 +45,19 @@ def test_stationarity(timeseries):
     rolling_mean = timeseries.rolling(window=24).mean()
     rolling_std = timeseries.rolling(window=24).std()
 
-    plt.figure(figsize=(20,8))
-    plt.plot(timeseries, label='Original', color='blue')
-    plt.plot(rolling_mean, label='Rolling Mean', color='red')
-    plt.plot(rolling_std, label='Rolling Std', color='black')
+    # plt.figure(figsize=(20,8))
+    # plt.plot(timeseries, label='Original', color='blue')
+    # plt.plot(rolling_mean, label='Rolling Mean', color='red')
+    # plt.plot(rolling_std, label='Rolling Std', color='black')
 
-    plt.title("Rolling Mean & Rolling Standard Deviation")
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+    # plt.title("Rolling Mean & Rolling Standard Deviation")
+    # plt.legend()
+    # plt.grid(True)
+    # plt.show()
 
-    print("=" * 60)
-    print("Augmented Dickey-Fuller Test")
-    print("=" * 60)
+    # print("=" * 60)
+    # print("Augmented Dickey-Fuller Test")
+    # print("=" * 60)
 
     result = adfuller(timeseries.dropna(), autolag='AIC')
 
@@ -68,16 +68,16 @@ def test_stationarity(timeseries):
     for key, value in result[4].items():
         output[f'Critical Value ({key})'] = value
 
-    print(output)
+    # print(output)
 
-    print("\nConclusion")
+#     print("\nConclusion")
 
-    if result[1] <= 0.05:
-        print("Data is Stationary.")
-    else:
-        print("Data is NOT Stationary.")
+#     if result[1] <= 0.05:
+#         print("Data is Stationary.")
+#     else:
+#         print("Data is NOT Stationary.")
 
-test_stationarity(train_original['Count'])
+# test_stationarity(train_original['Count'])
 
 #      OUTPUT
 
@@ -100,8 +100,24 @@ valid = train.loc['2014-06-25':'2014-09-25']
 Train_log = np.log(Train['Count'])
 valid_log = np.log(valid['Count'])
 
-moving_avg = Train_log.rolling(window=24).mean()
+# moving_avg = Train_log.rolling(window=24).mean()
 
-# plt.plot(Train_log)
-# plt.plot(moving_avg, color='red')
-# plt.show()
+# # plt.plot(Train_log)
+# # plt.plot(moving_avg, color='red')
+# # plt.show()
+
+# train_log_moving_avg_diff = Train_log - moving_avg
+# train_log_moving_avg_diff.dropna(inplace = True)
+# test_stationarity(train_log_moving_avg_diff)
+
+# ============================================================
+# Augmented Dickey-Fuller Test
+# ============================================================
+# Test Statistic              -22.470949
+# p-value                       0.000000
+# # Lags Used                  43.000000
+# Number of Observations    15989.000000
+# Critical Value (1%)          -3.430759
+# Critical Value (5%)          -2.861721
+# Critical Value (10%)         -2.566866
+# dtype: float64
