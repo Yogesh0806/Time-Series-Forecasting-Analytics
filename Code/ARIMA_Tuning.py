@@ -200,7 +200,12 @@ from statsmodels.tsa.arima.model import ARIMA
 
 model = ARIMA(Train_log, order=(2,1,0))
 result_AR = model.fit()
-plt.plot(train_log_diff.dropna(), label ='original')
-plt.plot(result_AR.fittedvalues, color ='red', label ='predictions')
-plt.legend(loc='best')
-plt.show()
+# plt.plot(train_log_diff.dropna(), label ='original')
+# plt.plot(result_AR.fittedvalues, color ='red', label ='predictions')
+# plt.legend(loc='best')
+# plt.show()
+
+# Creating seperate series and observe it 
+AR_predict = result_AR.predict(start= "2014-06-25", end ='2014-09-25')
+AR_predict =AR_predict.cumsum().shift().fillna(0)
+AR_predict = pd.Series(np.ones(valid.shape[0]) * np.log(valid['Count'])[0],index = valid.index)
