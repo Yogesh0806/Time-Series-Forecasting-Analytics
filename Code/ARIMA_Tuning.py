@@ -121,3 +121,27 @@ valid_log = np.log(valid['Count'])
 # Critical Value (5%)          -2.861721
 # Critical Value (10%)         -2.566866
 # dtype: float64
+
+'''Removing Seasonality'''
+
+from statsmodels.tsa.seasonal import seasonal_decompose
+decomposition = seasonal_decompose(pd.DataFrame(Train_log).Count.values, period= 24)
+
+trend = decomposition.trend
+seasonal = decomposition.seasonal
+residual = decomposition.resid
+
+plt.subplot(411)
+plt.plot(Train_log, label ='Original')
+plt.legend(loc = 'best')
+plt.subplot(412)
+plt.plot(trend, label = 'Trend')
+plt.legend(loc = 'best')
+plt.subplot(413)
+plt.plot(seasonal, label= 'Seasonality')
+plt.legend(loc = 'best')
+plt.subplot(414)
+plt.plot(residual, label = 'Residuals')
+plt.legend(loc = 'best')
+plt.tight_layout()
+plt.show()
