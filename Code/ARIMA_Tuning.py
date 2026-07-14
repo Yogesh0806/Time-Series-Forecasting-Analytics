@@ -100,15 +100,15 @@ valid = train.loc['2014-06-25':'2014-09-25']
 Train_log = np.log(Train['Count'])
 valid_log = np.log(valid['Count'])
 
-# moving_avg = Train_log.rolling(window=24).mean()
+moving_avg = Train_log.rolling(window=24).mean()
 
 # # plt.plot(Train_log)
 # # plt.plot(moving_avg, color='red')
 # # plt.show()
 
-# train_log_moving_avg_diff = Train_log - moving_avg
-# train_log_moving_avg_diff.dropna(inplace = True)
-# test_stationarity(train_log_moving_avg_diff)
+train_log_moving_avg_diff = Train_log - moving_avg
+train_log_moving_avg_diff.dropna(inplace = True)
+test_stationarity(train_log_moving_avg_diff)
 
 # ============================================================
 # Augmented Dickey-Fuller Test
@@ -121,6 +121,8 @@ valid_log = np.log(valid['Count'])
 # Critical Value (5%)          -2.861721
 # Critical Value (10%)         -2.566866
 # dtype: float64
+train_log_diff = Train_log - Train_log.shift(1)
+test_stationarity(train_log_diff.dropna())
 
 '''Removing Seasonality'''
 
@@ -167,3 +169,22 @@ test_stationarity(train_log_decompse[0])
 # Critical Value (10%)         -2.566866
 # dtype: float64
 
+
+'''Forcasting the Time Series using ARIMA'''
+from statsmodels.tsa.stattools import acf, pacf
+lag_acf = acf(train_log_diff.dropna(), nlags=25)
+lag_pacf = pacf(train_log_diff.dropna(), nlags =25, method='ols')
+
+'''ACF and PACF plot'''
+plt.plot(lag_acf)
+plt.axhline(y=0, linestyle ='--', color='gray')
+plt.axhline(y=-1.96/np.sqrt(len(train_log_diff.dropna())), linestyle = '--', color ='gray')
+plt.axhline(y=1.96/np.sqrt(len(train_log_diff.dropna())), linestyle = '--', color ='gray')
+plt.title('Autocorrelation Function')
+plt.show()
+plt.plot(lag_pacf)
+plt.axhline(y=0, linestyle ='--', color='gray')
+plt.axhline(y=-1.96/np.sqrt(len(train_log_diff.dropna())), linestyle = '--', color ='gray')
+plt.axhline(y=1.96/np.sqrt(len(train_log_diff.dropna())), linestyle = '--', color ='gray')
+plt.title('Partial Autocorrelation Function')
+plt.show()
