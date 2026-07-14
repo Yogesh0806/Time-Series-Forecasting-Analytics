@@ -55,9 +55,9 @@ def test_stationarity(timeseries):
     # plt.grid(True)
     # plt.show()
 
-    print("=" * 60)
-    print("Augmented Dickey-Fuller Test")
-    print("=" * 60)
+    # print("=" * 60)
+    # print("Augmented Dickey-Fuller Test")
+    # print("=" * 60)
 
     result = adfuller(timeseries.dropna(), autolag='AIC')
 
@@ -68,7 +68,7 @@ def test_stationarity(timeseries):
     for key, value in result[4].items():
         output[f'Critical Value ({key})'] = value
 
-    print(output)
+    # print(output)
 
 #     print("\nConclusion")
 
@@ -171,20 +171,36 @@ test_stationarity(train_log_decompse[0])
 
 
 '''Forcasting the Time Series using ARIMA'''
+
+
 from statsmodels.tsa.stattools import acf, pacf
 lag_acf = acf(train_log_diff.dropna(), nlags=25)
 lag_pacf = pacf(train_log_diff.dropna(), nlags =25, method='ols')
 
 '''ACF and PACF plot'''
-plt.plot(lag_acf)
-plt.axhline(y=0, linestyle ='--', color='gray')
-plt.axhline(y=-1.96/np.sqrt(len(train_log_diff.dropna())), linestyle = '--', color ='gray')
-plt.axhline(y=1.96/np.sqrt(len(train_log_diff.dropna())), linestyle = '--', color ='gray')
-plt.title('Autocorrelation Function')
-plt.show()
-plt.plot(lag_pacf)
-plt.axhline(y=0, linestyle ='--', color='gray')
-plt.axhline(y=-1.96/np.sqrt(len(train_log_diff.dropna())), linestyle = '--', color ='gray')
-plt.axhline(y=1.96/np.sqrt(len(train_log_diff.dropna())), linestyle = '--', color ='gray')
-plt.title('Partial Autocorrelation Function')
+# plt.plot(lag_acf)
+# plt.axhline(y=0, linestyle ='--', color='gray')
+# plt.axhline(y=-1.96/np.sqrt(len(train_log_diff.dropna())), linestyle = '--', color ='gray')
+# plt.axhline(y=1.96/np.sqrt(len(train_log_diff.dropna())), linestyle = '--', color ='gray')
+# plt.title('Autocorrelation Function')
+# plt.show()
+# plt.plot(lag_pacf)
+# plt.axhline(y=0, linestyle ='--', color='gray')
+# plt.axhline(y=-1.96/np.sqrt(len(train_log_diff.dropna())), linestyle = '--', color ='gray')
+# plt.axhline(y=1.96/np.sqrt(len(train_log_diff.dropna())), linestyle = '--', color ='gray')
+# plt.title('Partial Autocorrelation Function')
+# plt.show()
+
+'''Lets Start Final ARIMA Model'''
+
+
+'''AR MODEL'''
+
+from statsmodels.tsa.arima.model import ARIMA
+
+model = ARIMA(Train_log, order=(2,1,0))
+result_AR = model.fit()
+plt.plot(train_log_diff.dropna(), label ='original')
+plt.plot(result_AR.fittedvalues, color ='red', label ='predictions')
+plt.legend(loc='best')
 plt.show()
