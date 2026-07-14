@@ -55,9 +55,9 @@ def test_stationarity(timeseries):
     # plt.grid(True)
     # plt.show()
 
-    # print("=" * 60)
-    # print("Augmented Dickey-Fuller Test")
-    # print("=" * 60)
+    print("=" * 60)
+    print("Augmented Dickey-Fuller Test")
+    print("=" * 60)
 
     result = adfuller(timeseries.dropna(), autolag='AIC')
 
@@ -68,7 +68,7 @@ def test_stationarity(timeseries):
     for key, value in result[4].items():
         output[f'Critical Value ({key})'] = value
 
-    # print(output)
+    print(output)
 
 #     print("\nConclusion")
 
@@ -131,17 +131,39 @@ trend = decomposition.trend
 seasonal = decomposition.seasonal
 residual = decomposition.resid
 
-plt.subplot(411)
-plt.plot(Train_log, label ='Original')
-plt.legend(loc = 'best')
-plt.subplot(412)
-plt.plot(trend, label = 'Trend')
-plt.legend(loc = 'best')
-plt.subplot(413)
-plt.plot(seasonal, label= 'Seasonality')
-plt.legend(loc = 'best')
-plt.subplot(414)
-plt.plot(residual, label = 'Residuals')
-plt.legend(loc = 'best')
-plt.tight_layout()
-plt.show()
+# plt.subplot(411)
+# plt.plot(Train_log, label ='Original')
+# plt.legend(loc = 'best')
+# plt.subplot(412)
+# plt.plot(trend, label = 'Trend')
+# plt.legend(loc = 'best')
+# plt.subplot(413)
+# plt.plot(seasonal, label= 'Seasonality')
+# plt.legend(loc = 'best')
+# plt.subplot(414)
+# plt.plot(residual, label = 'Residuals')
+# plt.legend(loc = 'best')
+# plt.tight_layout()
+# plt.show()
+
+# Stationarity of residuals 
+
+train_log_decompse = pd.DataFrame(residual)
+train_log_decompse['date'] = Train_log.index
+train_log_decompse.set_index('date', inplace=True)
+train_log_decompse.dropna(inplace=True)
+test_stationarity(train_log_decompse[0])
+
+# Output
+# ============================================================
+# Augmented Dickey-Fuller Test
+# ============================================================
+# Test Statistic              -31.326116
+# p-value                       0.000000
+# # Lags Used                  43.000000
+# Number of Observations    15988.000000
+# Critical Value (1%)          -3.430759
+# Critical Value (5%)          -2.861721
+# Critical Value (10%)         -2.566866
+# dtype: float64
+
