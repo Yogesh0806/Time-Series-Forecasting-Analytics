@@ -208,4 +208,6 @@ result_AR = model.fit()
 # Creating seperate series and observe it 
 AR_predict = result_AR.predict(start= "2014-06-25", end ='2014-09-25')
 AR_predict =AR_predict.cumsum().shift().fillna(0)
-AR_predict = pd.Series(np.ones(valid.shape[0]) * np.log(valid['Count'])[0],index = valid.index)
+AR_predict1 = pd.Series(np.ones(valid.shape[0]) * np.log(valid['Count'])[0],index = valid.index)
+AR_predict1 = AR_predict.add(AR_predict,fill_value = 0)
+AR_predict = np.exp(AR_predict1)
