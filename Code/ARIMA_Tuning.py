@@ -259,3 +259,33 @@ AR_predict.index = valid.index
 # Calculate RMSE
 rmse = sqrt(mean_squared_error(valid['Count'], AR_predict))
 
+from sklearn.metrics import mean_squared_error
+from math import sqrt
+
+# Predict on validation period
+prediction = result_AR.get_prediction(
+    start=valid.index[0],
+    end=valid.index[-1]
+)
+
+# Predicted values (log scale)
+AR_predict = prediction.predicted_mean
+
+# Convert to original scale
+AR_predict = np.exp(AR_predict)
+
+# Match validation index
+AR_predict.index = valid.index
+
+# Calculate RMSE
+rmse = sqrt(mean_squared_error(valid['Count'], AR_predict))
+
+# Validation Plot
+plt.figure(figsize=(12,5))
+
+plt.plot(valid['Count'], label='Valid')
+plt.plot(AR_predict, color='red', label='Predict')
+
+plt.legend(loc='best')
+plt.title('RMSE : %.4f' % rmse)
+plt.show()
