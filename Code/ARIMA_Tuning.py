@@ -196,24 +196,36 @@ lag_pacf = pacf(train_log_diff.dropna(), nlags =25, method='ols')
 
 '''AR MODEL'''
 
+
 from statsmodels.tsa.arima.model import ARIMA
+from sklearn.metrics import mean_squared_error
+from math import sqrt
 
 model = ARIMA(Train_log, order=(2,1,0))
 result_AR = model.fit()
-# plt.plot(train_log_diff.dropna(), label ='original')
-# plt.plot(result_AR.fittedvalues, color ='red', label ='predictions')
-# plt.legend(loc='best')
-# plt.show()
 
-# Creating seperate series and observe it 
-AR_predict = result_AR.predict(start= "2014-06-25", end ='2014-09-25')
-AR_predict =AR_predict.cumsum().shift().fillna(0)
-AR_predict1 = pd.Series(np.ones(valid.shape[0]) * np.log(valid['Count'])[0],index = valid.index)
-AR_predict1 = AR_predict.add(AR_predict,fill_value = 0)
-AR_predict = np.exp(AR_predict1)
+# Forecast the validation period
+forecast = result_AR.forecast(steps=len(valid))
 
-plt.plot(valid['Count'], label = "Valid")
-plt.plot(AR_predict, color = 'red', label = 'predict')
-plt.legend(loc ='best')
-plt.title('RMSE : %.4f'% (np.sqrt(np.dot(AR_predict, valid['Count']))/valid.shape[0]))
+# Convert from log scale back to original scale
+AR_predict = np.exp(forecast)
+
+# Calculate RMSE
+rmse = sqrt(mean_squared_error(valid['Count'], AR_predict))
+
+# Plot
+plt.figure(figsize=(15,6))
+
+plt.plot(valid.index, valid['Count'], label='Actual')
+plt.plot(valid.index, AR_predict, color='red', label='ARIMA Prediction')
+
+plt.xlabel("Date")
+plt.ylabel("Passenger Count")
+plt.title(f"ARIMA Forecast\nRMSE = {rmse:.4f}")
+
+plt.legend()
+plt.grid(True)
+
 plt.show()
+
+print(f"RMSE: {rmse:.4f}")
