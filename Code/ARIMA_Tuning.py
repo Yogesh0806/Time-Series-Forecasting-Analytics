@@ -290,3 +290,8 @@ from math import sqrt
 '''MA MODEL'''
 
 model = ARIMA(Train_log, order=(0,1,2))     # Here the p value is zero since it is just the MA model
+result_MA = model.fit()
+plt.plot(train_log_diff.dropna(), label='original')
+plt.plot(result_MA.fittedvalues, color = 'red', label='prediction')
+plt.legend(loc ='best')
+plt.show()
