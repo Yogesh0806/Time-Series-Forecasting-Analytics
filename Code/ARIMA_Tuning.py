@@ -315,7 +315,35 @@ MA_predict = np.exp(MA_predict1)
 model = ARIMA(Train_log, order =(2,1,2))
 result_ARIMA = model.fit()
 
-plt.plot(train_log_diff.dropna(), label ='original')
-plt.plot(result_ARIMA.fittedvalues, color ='red', label ='predicted')
-plt.legend(loc = 'best')
-plt.show()
+# plt.plot(train_log_diff.dropna(), label ='original')
+# plt.plot(result_ARIMA.fittedvalues, color ='red', label ='predicted')
+# plt.legend(loc = 'best')
+# plt.show()
+
+def check_prediction_diff(predict_diff, given_set):
+    predict_diff = predict_diff.cumsum().shift().fillna(0)
+    predict_base = pd.Series(np.ones(given_set.shape[0])* np.log(given_set['Count'])[0], index = given_set.index)
+    predict_log = predict_base.add(predict_diff, fill_value=0)
+    predict = np.exp(predict_log)
+    
+    plt.plot(given_set['Count'], label = "Given Set")
+    plt.plot(predict, color = 'red', label = 'Predict')
+    plt.legend(loc = 'best')
+    # plt.title('RMSE : %.4f'% (np.sqrt(np.sqrt(predict, given_set['Count']))/given_set.shape[0]))
+    rmse = np.sqrt(np.mean((predict - given_set['Count'])**2))
+
+    plt.title('RMSE : %.4f' % rmse)
+    plt.show()
+    
+def chack_prediction_log(predict_log, given_set):
+    predict = np.exp(predict_log)
+    
+    plt.plot(given_set['Count'], label = "Given Set")
+    plt.plot(predict, color = 'red', label = 'Predict')
+    plt.legend(loc = 'best')
+    plt.title('RMSE : %.4f'% (np.sqrt(np.sqrt(predict, given_set['Count']))/given_set.shape[0]))
+    plt.show()
+    
+
+ARIMA_predict_diff = result_ARIMA.predict(start = "2014-06-25", end = "2014-09-25")
+check_prediction_diff(ARIMA_predict_diff, valid)
