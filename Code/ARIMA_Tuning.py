@@ -291,7 +291,19 @@ from math import sqrt
 
 model = ARIMA(Train_log, order=(0,1,2))     # Here the p value is zero since it is just the MA model
 result_MA = model.fit()
-plt.plot(train_log_diff.dropna(), label='original')
-plt.plot(result_MA.fittedvalues, color = 'red', label='prediction')
-plt.legend(loc ='best')
+# plt.plot(train_log_diff.dropna(), label='original')
+# plt.plot(result_MA.fittedvalues, color = 'red', label='prediction')
+# plt.legend(loc ='best')
+# plt.show()
+
+MA_predict = result_MA.predict(start = "2014-06-25", end ="2014-09-25")
+MA_predict = MA_predict.cumsum().shift().fillna(0)
+MA_predict1 = pd.Series(np.ones(valid.shape[0]) * np.log(valid['Count'])[0], index =valid.index)
+MA_predict = MA_predict1.add(MA_predict,fill_value=0)
+MA_predict = np.exp(MA_predict1)
+
+plt.plot(valid['Count'], label = "Valid")
+plt.plot(MA_predict, color = 'red', label = 'Predict')
+plt.legend(loc='best')
+plt.title('RMSE : %.4f'% (np.sqrt(np.dot(MA_predict, valid['Count']))/valid.shape[0]))
 plt.show()
