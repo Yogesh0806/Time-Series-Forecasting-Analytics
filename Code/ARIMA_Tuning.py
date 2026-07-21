@@ -347,3 +347,13 @@ def chack_prediction_log(predict_log, given_set):
 
 ARIMA_predict_diff = result_ARIMA.predict(start = "2014-06-25", end = "2014-09-25")
 check_prediction_diff(ARIMA_predict_diff, valid)
+
+'''SARIMAX Model on daily time series'''
+
+import statsmodels.api as sm
+
+y_hat_avg = valid.copy()
+fit1 = sm.tsa.statespace.SARIMAX(Train['Count'], order = (2, 1, 4), seasonal_order = (0, 1, 1, 7)).fit()
+y_hat_avg['SARIMA'] = fit1.predict(start = "2014-06-25", end = "2014-09-25", dynamic= True)
+
+plt.figure(figsize=(12,5))
