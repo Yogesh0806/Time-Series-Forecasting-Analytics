@@ -349,21 +349,37 @@ ARIMA_predict_diff = result_ARIMA.predict(start = "2014-06-25", end = "2014-09-2
 check_prediction_diff(ARIMA_predict_diff, valid)
 
 '''SARIMAX Model on daily time series'''
-
 import statsmodels.api as sm
+from sklearn.metrics import mean_squared_error
+from math import sqrt
 
+# Copy validation dataframe
 y_hat_avg = valid.copy()
-fit1 = sm.tsa.statespace.SARIMAX(Train['Count'], order = (2, 1, 4), seasonal_order = (0, 1, 1, 7)).fit()
-y_hat_avg['SARIMA'] = fit1.predict(start = "2014-06-25", end = "2014-09-25", dynamic= True)
 
-# plt.figure(figsize=(12,5))
-# plt.plot(Train['Count'], label = 'Train')
-# plt.plot(valid['Count'], label = 'Valid')
-# plt.plot(y_hat_avg['SARIMA'], label = 'SARIMA')
-# plt.legend(loc = 'best')
-# plt.show()
+# Train SARIMA model
+fit1 = sm.tsa.statespace.SARIMAX(Train["Count"],order=(2,1,4),seasonal_order=(0,1,1,7),enforce_stationarity=False,enforce_invertibility=False).fit(disp=False)
 
-print("NaN in valid.Count :", valid["Count"].isna().sum())
-print("NaN in SARIMA :", y_hat_avg["SARIMA"].isna().sum())
-# rms = sqrt(mean_squared_error(valid.Count, y_hat_avg.SARIMA))
-# print(rms)
+# Forecast validation period
+pred = fit1.get_forecast(steps=len(valid))
+
+# Predicted values
+y_hat_avg["SARIMA"] = pred.predicted_mean.values
+
+# Plot
+plt.figure(figsize=(15,6))
+plt.plot(Train["Count"], label="Train")
+plt.plot(valid["Count"], label="Validation")
+plt.plot(valid.index, y_hat_avg["SARIMA"], color="red", label="SARIMA Forecast")
+plt.legend()
+plt.grid(True)
+plt.title("SARIMA Forecast")
+plt.show()
+
+
+# RMSE
+rms = sqrt(mean_squared_error(valid["Count"], y_hat_avg["SARIMA"]))
+
+print("RMSE :", rms)
+
+        # RMSE : 183.8043105936754
+        
