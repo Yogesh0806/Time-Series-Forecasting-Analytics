@@ -335,14 +335,14 @@ def check_prediction_diff(predict_diff, given_set):
     plt.title('RMSE : %.4f' % rmse)
     plt.show()
     
-def chack_prediction_log(predict_log, given_set):
-    predict = np.exp(predict_log)
+# def chack_prediction_log(predict_log, given_set):
+#     predict = np.exp(predict_log)
     
-    plt.plot(given_set['Count'], label = "Given Set")
-    plt.plot(predict, color = 'red', label = 'Predict')
-    plt.legend(loc = 'best')
-    plt.title('RMSE : %.4f'% (np.sqrt(np.sqrt(predict, given_set['Count']))/given_set.shape[0]))
-    plt.show()
+    # plt.plot(given_set['Count'], label = "Given Set")
+    # plt.plot(predict, color = 'red', label = 'Predict')
+    # plt.legend(loc = 'best')
+    # plt.title('RMSE : %.4f'% (np.sqrt(np.sqrt(predict, given_set['Count']))/given_set.shape[0]))
+    # plt.show()
     
 
 ARIMA_predict_diff = result_ARIMA.predict(start = "2014-06-25", end = "2014-09-25")
@@ -356,9 +356,14 @@ y_hat_avg = valid.copy()
 fit1 = sm.tsa.statespace.SARIMAX(Train['Count'], order = (2, 1, 4), seasonal_order = (0, 1, 1, 7)).fit()
 y_hat_avg['SARIMA'] = fit1.predict(start = "2014-06-25", end = "2014-09-25", dynamic= True)
 
-plt.figure(figsize=(12,5))
-plt.plot(Train['Count'], label = 'Train')
-plt.plot(valid['Count'], label = 'Valid')
-plt.plot(y_hat_avg['SARIMA'], label = 'SARIMA')
-plt.legend(loc = 'best')
-plt.show()
+# plt.figure(figsize=(12,5))
+# plt.plot(Train['Count'], label = 'Train')
+# plt.plot(valid['Count'], label = 'Valid')
+# plt.plot(y_hat_avg['SARIMA'], label = 'SARIMA')
+# plt.legend(loc = 'best')
+# plt.show()
+
+print("NaN in valid.Count :", valid["Count"].isna().sum())
+print("NaN in SARIMA :", y_hat_avg["SARIMA"].isna().sum())
+# rms = sqrt(mean_squared_error(valid.Count, y_hat_avg.SARIMA))
+# print(rms)
