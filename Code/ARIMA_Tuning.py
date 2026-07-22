@@ -365,15 +365,15 @@ pred = fit1.get_forecast(steps=len(valid))
 # Predicted values
 y_hat_avg["SARIMA"] = pred.predicted_mean.values
 
-# Plot
-plt.figure(figsize=(15,6))
-plt.plot(Train["Count"], label="Train")
-plt.plot(valid["Count"], label="Validation")
-plt.plot(valid.index, y_hat_avg["SARIMA"], color="red", label="SARIMA Forecast")
-plt.legend()
-plt.grid(True)
-plt.title("SARIMA Forecast")
-plt.show()
+# # Plot
+# plt.figure(figsize=(15,6))
+# plt.plot(Train["Count"], label="Train")
+# plt.plot(valid["Count"], label="Validation")
+# plt.plot(valid.index, y_hat_avg["SARIMA"], color="red", label="SARIMA Forecast")
+# plt.legend()
+# plt.grid(True)
+# plt.title("SARIMA Forecast")
+# plt.show()
 
 
 # RMSE
@@ -382,4 +382,45 @@ rms = sqrt(mean_squared_error(valid["Count"], y_hat_avg["SARIMA"]))
 print("RMSE :", rms)
 
         # RMSE : 183.8043105936754
-        
+
+
+
+# Hourly ratio
+train_original['ratio'] = train_original['Count'] / train_original['Count'].sum()
+
+temp = train_original.groupby('Hour', as_index=False)['ratio'].sum()
+
+# Forecast test period
+forecast = fit1.get_forecast(steps=len(test))
+test['prediction'] = forecast.predicted_mean.values
+
+# Add Day, Month, Year columns
+test['Day'] = test['Datetime'].dt.day
+test['Month'] = test['Datetime'].dt.month
+test['Year'] = test['Datetime'].dt.year
+
+test_original['Day'] = test_original['Datetime'].dt.day
+test_original['Month'] = test_original['Datetime'].dt.month
+test_original['Year'] = test_original['Datetime'].dt.year
+
+# Merge prediction with original test
+merge = pd.merge(test,test_original[['Datetime','Day','Month','Year','Hour']],on=['Day','Month','Year'],how='left')
+
+merge['Hour'] = merge['Hour_y']
+
+merge = merge.drop(columns=['Day','Month','Year','Hour_x','Hour_y'])
+
+# Merge hourly ratio
+prediction = pd.merge(merge,temp,on='Hour',how='left')
+
+# Final prediction
+prediction['Count'] = (prediction['prediction']* prediction['ratio']* 24)
+
+print(merge.columns.tolist())
+print(prediction.columns.tolist())
+
+prediction['ID'] = prediction['ID_y']
+submission = prediction.drop(['Day','Hour', 'ratio', 'prediction', 'ID_x', 'ID_y'], axis=1)
+
+#Converting the final submission to csv format
+pd.DataFrame(submission, columns=['ID', 'Count']).to_csv('SARIMAX.csv', index=False)
