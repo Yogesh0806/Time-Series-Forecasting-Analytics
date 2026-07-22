@@ -348,79 +348,65 @@ def check_prediction_diff(predict_diff, given_set):
 ARIMA_predict_diff = result_ARIMA.predict(start = "2014-06-25", end = "2014-09-25")
 check_prediction_diff(ARIMA_predict_diff, valid)
 
-'''SARIMAX Model on daily time series'''
+'''SARIMAX Model'''
+
 import statsmodels.api as sm
 from sklearn.metrics import mean_squared_error
 from math import sqrt
+import matplotlib.pyplot as plt
 
-# Copy validation dataframe
-y_hat_avg = valid.copy()
 
-# Train SARIMA model
 fit1 = sm.tsa.statespace.SARIMAX(Train["Count"],order=(2,1,4),seasonal_order=(0,1,1,7),enforce_stationarity=False,enforce_invertibility=False).fit(disp=False)
 
-# Forecast validation period
-pred = fit1.get_forecast(steps=len(valid))
 
-# Predicted values
-y_hat_avg["SARIMA"] = pred.predicted_mean.values
+y_hat_avg = valid.copy()
 
-# # Plot
-# plt.figure(figsize=(15,6))
-# plt.plot(Train["Count"], label="Train")
-# plt.plot(valid["Count"], label="Validation")
-# plt.plot(valid.index, y_hat_avg["SARIMA"], color="red", label="SARIMA Forecast")
-# plt.legend()
-# plt.grid(True)
-# plt.title("SARIMA Forecast")
-# plt.show()
+forecast_valid = fit1.get_forecast(steps=len(valid))
+
+y_hat_avg["SARIMA"] = forecast_valid.predicted_mean.values
 
 
-# RMSE
+plt.figure(figsize=(16,6))
+
+plt.plot(Train["Count"], label="Train")
+plt.plot(valid["Count"], label="Validation")
+plt.plot(valid.index,y_hat_avg["SARIMA"],color="red",linewidth=2,label="SARIMA Forecast")
+plt.title("SARIMAX Forecast")
+plt.xlabel("Date")
+plt.ylabel("Count")
+plt.legend()
+plt.grid(True)
+
+plt.show()
+
+
 rms = sqrt(mean_squared_error(valid["Count"], y_hat_avg["SARIMA"]))
 
-print("RMSE :", rms)
-
-        # RMSE : 183.8043105936754
+print(f"RMSE : {rms:.4f}")
 
 
+forecast_test = fit1.get_forecast(steps=len(test))
 
-# Hourly ratio
-train_original['ratio'] = train_original['Count'] / train_original['Count'].sum()
+test["Count"] = forecast_test.predicted_mean.values
 
-temp = train_original.groupby('Hour', as_index=False)['ratio'].sum()
 
-# Forecast test period
-forecast = fit1.get_forecast(steps=len(test))
-test['prediction'] = forecast.predicted_mean.values
+submission = test[["ID", "Count"]].copy()
 
-# Add Day, Month, Year columns
-test['Day'] = test['Datetime'].dt.day
-test['Month'] = test['Datetime'].dt.month
-test['Year'] = test['Datetime'].dt.year
+submission.to_csv("SARIMAX.csv", index=False)
 
-test_original['Day'] = test_original['Datetime'].dt.day
-test_original['Month'] = test_original['Datetime'].dt.month
-test_original['Year'] = test_original['Datetime'].dt.year
+print(submission.head())
+print()
+print("Total Rows :", len(submission))
+print("SARIMAX.csv created successfully.")
 
-# Merge prediction with original test
-merge = pd.merge(test,test_original[['Datetime','Day','Month','Year','Hour']],on=['Day','Month','Year'],how='left')
 
-merge['Hour'] = merge['Hour_y']
+            # RMSE : 183.8043
+            #       ID       Count
+            # 0  18288  379.269444
+            # 1  18289  387.080188
+            # 2  18290  387.065115
+            # 3  18291  384.477022
+            # 4  18292  387.540585
 
-merge = merge.drop(columns=['Day','Month','Year','Hour_x','Hour_y'])
-
-# Merge hourly ratio
-prediction = pd.merge(merge,temp,on='Hour',how='left')
-
-# Final prediction
-prediction['Count'] = (prediction['prediction']* prediction['ratio']* 24)
-
-print(merge.columns.tolist())
-print(prediction.columns.tolist())
-
-prediction['ID'] = prediction['ID_y']
-submission = prediction.drop(['Day','Hour', 'ratio', 'prediction', 'ID_x', 'ID_y'], axis=1)
-
-#Converting the final submission to csv format
-pd.DataFrame(submission, columns=['ID', 'Count']).to_csv('SARIMAX.csv', index=False)
+            # Total Rows : 5112
+            # SARIMAX.csv created successfully.
